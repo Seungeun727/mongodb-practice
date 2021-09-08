@@ -24,7 +24,9 @@ console.log(__filename);   // 현재 모듈의 파일명
 // const square = require("./modules/test_module1").square;
 
 // 전개 연산을 이용한 require
-const { add, square } = require("./modules/test_module1");     // require로 불러온 것과 {}의 내용과 일치해야 성립함
+const { add, square } = require("./modules/test_module1");    
+// * 파일 내부의 객체를 외부의 객체로 내보낼 때 함수명이 일치해야함
+// require로 불러온 것과 {}의 내용과 일치해야 성립함
 const area = require("./modules/test_module2");
 console.log(add(10,20));    // 불러온 객체 사용
 console.log(square(30));
