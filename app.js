@@ -99,11 +99,15 @@ app.get('/', function(req, res) {
     res.send("<h1>hi friend!</h1>")
 })
 
+// Router 등록(미들웨어) 
+const webRouter = require("./router/WebRouter")(app);
+app.use("/web", webRouter);
+
 function startServer() {
     // database 연결 정보
     const dburl = "mongodb://localhost:27017";
     // 데이터베이스 Connect
-    MongoClient.connect(dburl, {useNewUrlParser: true})
+    MongoClient.connect(dburl, {useNewUrlParser: true})  // # dburl 접속과 옵션 설정
         .then(client => {
             //db 선택
             console.log("데이터베이스에 연결되었습니다.");
