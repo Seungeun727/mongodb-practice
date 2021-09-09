@@ -11,6 +11,7 @@ const app = express();
 
 //  etag를 사용하지 않음  
 app.set("etag", false);
+
 //  환경 변수에 PORT 가 설정되어 있으면 그 값을 사용
 //  설정이 안되어 있으면 3000
 app.set('port', process.env.PORT || 3000);
@@ -22,13 +23,17 @@ const logger = require("morgan");   //  로거 불러오기
 //  로거를 express에 추가: 마들웨어 추가
 app.use(logger("dev"));
 
-// Mongo DB
-// #모듈을 불러온다.
+//  MongoDB
 const { MongoClient } = require("mongodb");
 
 //  정적 웹의 제공
 //  미들웨어 express.static 미들웨어 함수를 등록 
 app.use(express.static(__dirname + "/public"));
+
+//  body-parser 등록
+//  4.16 버전 이후에는 express 내부에 bodyParser가 포함 
+//  POST 요청을 처리할 수 있게 된다.
+app.use(express.urlencoded({ extended: false }));
 
 //  View 엔진 설정
 app.set("view engine", "ejs");  //  뷰엔진으로 ejs 사용 선언
@@ -95,40 +100,37 @@ app.get("/render", (req, resp) => {
         .render("render");
 });
 
-app.get('/', function(req, res) {
-    res.send("<h1>hi friend!</h1>")
-})
-
-// Router 등록(미들웨어) 
+//  Router 등록(미들웨어)
 const webRouter = require("./router/WebRouter")(app);
 app.use("/web", webRouter);
+const apiRouter = require("./router/apiRouter")(app);
+app.use("/api", apiRouter);
 
 function startServer() {
-    // database 연결 정보
+    //  database 연결 정보
     const dburl = "mongodb://localhost:27017";
-    // 데이터베이스 Connect
-    MongoClient.connect(dburl, {useNewUrlParser: true})  // # dburl 접속과 옵션 설정
+    //  데이터베이스 Connect
+    MongoClient.connect(dburl, { useNewUrlParser: true })
         .then(client => {
-            //db 선택
-            console.log("데이터베이스에 연결되었습니다.");
-            let db = client.db("mydb");
-            // 익스프레스에 추가
-            app.set("db", db);      // db키로 몽고 클라이언트 추가
+            //  db 선택
+            console.log("데이터베이스에 연결 되었습니다.");
+            let db = client.db("mydb")
+            //  익스프레스에 추가
+            app.set("db", db); //   db 키로 몽고 클라이언트 추가
 
-            // express 실행
+            //  express 실행
             startExpress();
         })
         .catch(reason => {
             console.error(reason);
-        })
+        });
 }
 
 function startExpress() {
     //  서버 start
     http.createServer(app).listen(app.get("port"), () => {
-    console.log("Web Server is running on port:" + app.get("port"));
+        console.log("Web Server is running on port:" + app.get("port"));
     })
 }
+
 startServer();
-
-
